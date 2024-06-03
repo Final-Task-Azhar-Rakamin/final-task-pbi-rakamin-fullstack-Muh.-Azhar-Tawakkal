@@ -22,6 +22,7 @@ func SetRouter() *gin.Engine {
 		photos.DELETE("/:id", photocontroller.Delete)
 	}
 
+	//Users Endpoint
 	users := router.Group("/users")
 	{
 		users.POST("/register", usercontroller.Register)

@@ -34,7 +34,7 @@ func Login(c *gin.Context) {
 	if err := database.DB.Where("email = ?", loginUser.Email).First(&userData).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
-			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "User tidak ditemukan"})
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "User not found"})
 			return
 		default:
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -56,7 +56,7 @@ func Login(c *gin.Context) {
 	}
 	cookieName := "jwt_token"
 	cookieValue := token
-	maxAge := 60
+	maxAge := 3600
 	path := "/"
 	domain := "localhost"
 	secure := false
@@ -128,7 +128,7 @@ func Register(c *gin.Context) {
 	}
 
 	database.DB.Create(&user)
-	c.JSON(http.StatusOK, gin.H{"message": "Register success", "photo": user})
+	c.JSON(http.StatusOK, gin.H{"message": "Register success", "data": user})
 }
 
 func Logout(c *gin.Context) {
@@ -223,6 +223,12 @@ func DeleteUser(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Delete failed"})
 		return
 	}
-
+	postDir := "./assets/posts/"
+	prefix := id + "_posts"
+	if err := helpers.DeleteUserPhoto(postDir, prefix); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Delete failed"})
+		return
+	}
+	c.SetCookie("jwt_token", "", -1, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "Delete data success"})
 }

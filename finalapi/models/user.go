@@ -8,8 +8,8 @@ type User struct {
 	Email     string    `gorm:"type:varchar(300);unique" form:"email" valid:"required, email"`
 	Password  string    `gorm:"type:varchar(300)" form:"password" valid:"required, minstringlength(6)"`
 	ProfilUrl string    `gorm:"type:varchar(300)"`
-	CreatedAt time.Time `gorm:"type:timestamp"`
-	UpdatedAt time.Time `gorm:"type:timestamp"`
+	CreatedAt time.Time `gorm:"type:timestamp; default:CURRENT_TIMESTAMP"`
+	UpdatedAt time.Time `gorm:"type:timestamp; default:CURRENT_TIMESTAMP"`
 	Photos    []Photo   `gorm:"foreignKey:UserID; constraint:OnDelete:CASCADE;"`
 }
 
