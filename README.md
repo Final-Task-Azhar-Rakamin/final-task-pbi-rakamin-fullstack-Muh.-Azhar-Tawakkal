@@ -1,6 +1,6 @@
-# API-EmergenZ
+# API-Final Task
 
-These are all the APIs that will be used in the EmergenZ app project. The API is made to run these functions :
+These are all the APIs that will be used in the Final Task project. The API is made to run these functions :
 - Handle register and login for user
 - Handle update user data
 - Handle user posts
