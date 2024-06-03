@@ -154,7 +154,7 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	// Check and validate data
+	// Check and validate data ------------------------------------------------------
 	if file != nil {
 		typeFile := strings.Split(file.Filename, ".")[len(strings.Split(file.Filename, "."))-1]
 		updateUser.ProfilUrl = id + "_profile." + typeFile
@@ -176,7 +176,7 @@ func UpdateUser(c *gin.Context) {
 		updateUser.Password = string(hashedPassword)
 	}
 
-	// Update Data
+	// Update Data ----------------------------------------------------------------------
 	updateUser.UpdatedAt = time.Now()
 	if database.DB.Model(&user).Where("id = ?", id).Updates(&updateUser).RowsAffected == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Data is not found"})
@@ -199,13 +199,13 @@ func DeleteUser(c *gin.Context) {
 	var user models.User
 	id := c.Param("userId")
 
-	// Validate token
+	// Validate token --------------------------------------------------------------------
 	if valid := helpers.ValidateUser(c); !valid {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Access unauthorized"})
 		return
 	}
 
-	// Delete profile image
+	// Delete profile image --------------------------------------------------------------
 	if err := database.DB.Where("id = ?", id).First(&user).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
@@ -218,7 +218,7 @@ func DeleteUser(c *gin.Context) {
 	}
 	helpers.DeletePhoto("profile", user.ProfilUrl)
 
-	// Delete data
+	// Delete data and file -------------------------------------------------------------
 	if database.DB.Delete(&user, id).RowsAffected == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Delete failed"})
 		return

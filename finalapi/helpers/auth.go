@@ -21,10 +21,7 @@ func GenerateToken(user models.User) (string, error) {
 			ExpiresAt: jwt.NewNumericDate(expTime),
 		},
 	}
-
-	// medeklarasikan algoritma yang akan digunakan untuk signing
 	tokenAlgo := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	// signed token
 	token, err := tokenAlgo.SignedString(app.JWT_KEY)
 	return token, err
 }

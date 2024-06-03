@@ -27,13 +27,14 @@ func Show(c *gin.Context) {
 	var checkPhoto models.Photo
 	id := c.Param("id")
 
-	// Validate User
+	// Validate User---------------------------------------------------------------------------
 	database.DB.Model(&checkPhoto).Where("id = ?", id).First(&checkPhoto)
 	if valid := helpers.ValidateOwner(c, checkPhoto); !valid {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Access unauthorized"})
 		return
 	}
 
+	// Check Data ------------------------------------------------------------------------------
 	if err := database.DB.Where("id = ?", id).First(&photo).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
@@ -54,13 +55,13 @@ func Create(c *gin.Context) {
 	id, _ := c.Get("id")
 	file, _ := c.FormFile("photo_file")
 
-	// Binding data
+	// Binding data ---------------------------------------------------------------------------
 	if err := c.ShouldBind(&photo); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-	// Manage photo data
+	// Manage photo data -----------------------------------------------------------------------
 	if err := database.DB.Where("id = ?", id).First(&user).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
@@ -84,13 +85,13 @@ func Create(c *gin.Context) {
 		}
 	}
 
-	// Validate data
+	// Validate data ------------------------------------------------------------------------
 	if valid, err := govalidator.ValidateStruct(photo); !valid {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Manage file
+	// Manage file --------------------------------------------------------------------------
 	if file != nil {
 		savePath := "./assets/posts/" + photo.PhotoUrl
 		if err := c.SaveUploadedFile(file, savePath); err != nil {
@@ -108,20 +109,20 @@ func Update(c *gin.Context) {
 	var photo models.Photo
 	id := c.Param("id")
 
-	// Validate User
+	// Validate User -----------------------------------------------------------------------
 	database.DB.Where("id = ?", id).First(&photo)
 	if valid := helpers.ValidateOwner(c, photo); !valid {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Access unauthorized"})
 		return
 	}
 
-	// Binding data
+	// Binding data ------------------------------------------------------------------------
 	if err := c.ShouldBindBodyWithJSON(&UpdatePhoto); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-	// Update data
+	// Update data -------------------------------------------------------------------------
 	results := database.DB.Model(&photo).Where("id = ?", id).Updates(&UpdatePhoto)
 	if results.RowsAffected == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Update not affect anything"})
@@ -139,15 +140,15 @@ func Delete(c *gin.Context) {
 	var checkPhoto models.Photo
 	id := c.Param("id")
 
-	// Validate User
+	// Validate User ------------------------------------------------------------------------
 	database.DB.Where("id = ?", id).First(&checkPhoto)
 	if valid := helpers.ValidateOwner(c, checkPhoto); !valid {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Access unauthorized"})
 		return
 	}
 
+	// Delete data and file -----------------------------------------------------------------
 	helpers.DeletePhoto("post", checkPhoto.PhotoUrl)
-
 	if database.DB.Delete(&photo, "id = ?", id).RowsAffected == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Delete failed"})
 		return
